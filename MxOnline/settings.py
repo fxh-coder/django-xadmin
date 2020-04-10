@@ -146,6 +146,13 @@ yp_apikey = '6df689094eeec75e8e39452d37ec3622'
 REDIS_HOST = "127.0.0.1"
 REDIS_PORT = 6379
 
-
+# 上传图片目录的配置
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# 分页相关设置
+PAGINATION_SETTINGS = {
+    'PAGE_RANGE_DISPLAYED': 6,
+    'MARGIN_PAGES_DISPLAYED': 1,
+    'SHOW_FIRST_PAGE_WHEN_INVALID': True,
+}
