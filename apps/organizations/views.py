@@ -8,9 +8,27 @@ class OrgView(View):
     def get(self, request, *args, **kwargs):
         # 从数据库中取出数据
         all_orgs = CourseOrg.objects.all()
-        org_nums = CourseOrg.objects.count()
         all_citys = City.objects.all()
 
+        # 对课程机构进行筛选
+        category = request.GET.get("ct", "")
+        if category:
+            all_orgs = all_orgs.filter(category=category)
+
+        # 通过所在城市进行筛选
+        city_id = request.GET.get("city", "")
+        if city_id:
+            if city_id.isdigit():
+                all_orgs = all_orgs.filter(city_id=int(city_id))
+
+        # 对机构进行排序
+        sort = request.GET.get("sort", "")
+        if sort == "students":
+            all_orgs = all_orgs.order_by("-students")
+        elif sort == "courses":
+            all_orgs = all_orgs.order_by("-course_nums")
+
+        org_nums = all_orgs.count()
         # 对课程机构数据进行分页
         try:
             page = request.GET.get('page', 1)
@@ -24,5 +42,8 @@ class OrgView(View):
         return render(request, "org-list.html", {
             "all_orgs": orgs,
             "org_nums": org_nums,
-            "all_citys": all_citys
+            "all_citys": all_citys,
+            "category": category,
+            "city_id": city_id,
+            "sort": sort
         })
