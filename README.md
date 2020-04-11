@@ -143,3 +143,26 @@
 
 ## 分页使用的是django-pure-pagination
    先试用pip安装，然后在settings.py中加入到INSTALLED_APPS
+
+## 完成课程机构四个页面的显示，并且使每个应用都有自己的路由urls.py，然后在项目的urls.py包含进去
+   在每个应用下使用urlpatterns=[] 去定义自己的路由，然后在项目
+   urls.py中： url(r'^org/', include(('apps.organizations.urls', "organizations"), namespace="org")),
+   将应用的路由包含进来
+
+## 对于访问后台接口csrf_token的验证问题，解决办法有三种
+   1. 在对应的form表单中添加{% csrf_token %}
+   2. 在路由中使用url(r'^send_sms/', csrf_exempt(SendSmsView.as_view()), name="send_sms"),
+      csrf_exempt去避免验证
+   3. 如果是ajax请求访问：
+      beforeSend: function (xhr, settings) {
+         xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+      },
+      这样让后台自己去随机生成一个，后台不用自己写代码
+
+## 完成课程机构详情页面的展示
+   对于详情页面的展示，需要传入对应的机构id，路由设计为：
+   url(r'^(?P<org_id>\d+)/teacher/$', OrgTeacherView.as_view(), name="teacher"),
+   前端页面通过超链接访问时：href="{% url 'org:course' course_org.id %}" 传入id
+
+## 完成了收藏功能
+   收藏功能首先要判断是否进行了登录，之后在进行验证，然后根据类型，进行判断保存

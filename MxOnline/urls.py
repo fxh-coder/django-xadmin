@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from django.views.generic import TemplateView
 from apps.users.views import LoginView, LogoutView, SendSmsView, DynamicLoginView, RegisterView
-from apps.organizations.views import OrgView
+
 from django.conf.urls import url, include
 from django.views.decorators.csrf import csrf_exempt
 from django.views.static import serve
@@ -40,5 +40,9 @@ urlpatterns = [
     url(r'^media/(?P<path>.*)$', serve, {"document_root": MEDIA_ROOT}),
 
     # 机构相关页面
-    url(r'^org_list/', OrgView.as_view(), name="org_list"),
+    url(r'^org/', include(('apps.organizations.urls', "organizations"), namespace="org")),
+
+    # 用户相关操作
+    url(r'^op/', include(('apps.operations.urls', "operations"), namespace="op")),
+    
 ]
