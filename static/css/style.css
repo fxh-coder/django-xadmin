@@ -1,5 +1,5 @@
 body {
-    overflow: auto;
+    /* overflow: auto; */
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -1354,7 +1354,7 @@ textarea:focus {
 
 .searchbox {
     width: 460px;
-    height: 37px;
+    height: 41px;
     margin-top: 40px;
     border: 2px solid #717171;
     background: #fff;

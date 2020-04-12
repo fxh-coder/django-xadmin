@@ -1,9 +1,39 @@
 from django.views.generic.base import View
-from operations.forms import UserFavForm
+from operations.forms import UserFavForm, CommentsForm
 from django.http import JsonResponse
-from operations.models import UserFavorite
+from operations.models import UserFavorite, CourseComments
 from courses.models import Course
 from organizations.models import CourseOrg, Teacher
+
+
+class CommentView(View):
+    def post(self, request, *args, **kwargs):
+        # 先判断用户是否登录
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                "status": "fail",
+                "msg": "用户未登录"
+            })
+
+        comments_form = CommentsForm(request.POST)
+        if comments_form.is_valid():
+            course = comments_form.cleaned_data["course"]
+            comments = comments_form.cleaned_data["comments"]
+        
+            comment = CourseComments()
+            comment.user = request.user
+            comment.comments = comments
+            comment.course = course
+            comment.save()
+
+            return JsonResponse({
+                "status": "success"
+            })
+        else:
+            return JsonResponse({
+                "status": "fail",
+                "msg": "参数错误"
+            })
 
 
 class AddFavView(View):
@@ -19,7 +49,6 @@ class AddFavView(View):
         if user_fav_form.is_valid():
             fav_id = user_fav_form.cleaned_data["fav_id"]
             fav_type = user_fav_form.cleaned_data["fav_type"]
-            print("参数：", fav_id, fav_type)
             # 是否已经收藏
             existed_records = UserFavorite.objects.filter(user=request.user, fav_id=fav_id, fav_type=fav_type)
             if existed_records:

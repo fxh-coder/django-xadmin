@@ -757,11 +757,11 @@ i {
     background: #fff4e8;
     clear: both;
     color: #ff7a39;
-    padding: 5px 10px 0;
-    height: 35px;
+    padding: 8px 10px;
     line-height: 2em;
     overflow: hidden;
     cursor: pointer;
+    margin-bottom: 8px;
 }
 #notice a {
     color: #ff7a39;
