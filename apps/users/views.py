@@ -43,6 +43,16 @@ class RegisterView(View):
 
 
 class DynamicLoginView(View):
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return HttpResponseRedirect(reverse("index"))
+        next = request.GET.get("next", "")
+        login_form = DynamicLoginForm()
+        return render(request, "login.html", {
+            "login_form": login_form,
+            "next": next
+        })
+
     def post(self, request, *args, **kwargs):
         login_form = DynamicLoginPostForm(request.POST)
         # 这个字段是为了错误的话返回的仍然是动态登录的tab，会在前段页面中进行判断
@@ -61,6 +71,10 @@ class DynamicLoginView(View):
                 user.mobile = mobile
                 user.save()
             login(request, user)
+            # 登录成功之后怎么返回到登录前的页面
+            next = request.GET.get("next", "")
+            if next:
+                return HttpResponseRedirect(next)
             return HttpResponseRedirect(reverse("index"))
         else:
             d_form = DynamicLoginForm()
@@ -104,10 +118,11 @@ class LoginView(View):
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return HttpResponseRedirect(reverse("index"))
-
+        next = request.GET.get("next", "")
         login_form = DynamicLoginForm()
         return render(request, "login.html", {
-            "login_form": login_form
+            "login_form": login_form,
+            "next": next
         })
 
     def post(self, request, *args, **kwargs):
@@ -121,6 +136,10 @@ class LoginView(View):
 
             if user is not None:
                 login(request, user)
+                # 登录成功之后怎么返回到登录前的页面
+                next = request.GET.get("next", "")
+                if next:
+                    return HttpResponseRedirect(next)
                 return HttpResponseRedirect(reverse("index"))
             else:
                 return render(request, "login.html", {"msg": "用户名或密码错误", "login_form": login_form})
