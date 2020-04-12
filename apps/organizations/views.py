@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views.generic.base import View
 from organizations.models import CourseOrg, City
-from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
+from pure_pagination import Paginator, PageNotAnInteger
 from organizations.forms import AddAskForm
 from django.http import JsonResponse
 from operations.models import UserFavorite
