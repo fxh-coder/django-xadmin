@@ -1,3 +1,73 @@
 from django.shortcuts import render
+from django.views.generic.base import View
+from pure_pagination import Paginator, PageNotAnInteger
+from courses.models import Course, CourseTag
+from operations.models import UserFavorite
 
-# Create your views here.
+
+class CourseDetailView(View):
+    def get(self, request, course_id, *args, **kwargs):
+        course = Course.objects.get(id=int(course_id))
+        course.click_nums += 1
+        course.save()
+
+        # 获取收藏状态
+        has_fav_course=False
+        has_fav_org=False
+        if request.user.is_authenticated:
+            if UserFavorite.objects.filter(user=request.user, fav_id=course.id, fav_type=1):
+                has_fav_course=True
+            if UserFavorite.objects.filter(user=request.user, fav_id=course.course_org.id, fav_type=2):
+                has_fav_org=True
+
+        # 通过课程的tag做课程的推荐(模糊查询：name__contains 或者 name__iconcontains 区别是大小感敏感)
+        # 如果我们是想要对一批数据进行过滤的话，就需要exclude(id__in=[...])将需要过滤的添加到[]中
+        # tag = course.tag
+        # related_courses = []
+        # if tag:
+        #     related_courses = Course.objects.filter(tag__contains=tag).exclude(id=course.id)[:3]
+
+        tags = course.coursetag_set.all()
+        tag_list = [tag.tag for tag in tags]
+
+        course_tags = CourseTag.objects.filter(tag__in=tag_list).exclude(course__id=course.id)
+        # 使用set避免多个标签符合要求而被重复添加
+        related_courses = set()
+        for course_tag in course_tags:
+            related_courses.add(course_tag.course)
+
+        return render(request, "course-detail.html", {
+            "course": course,
+            "has_fav_course": has_fav_course,
+            "has_fav_org": has_fav_org,
+            "related_courses": related_courses
+        })
+
+
+class CourseListView(View):
+    def get(self, request, *args, **kwargs):
+        all_courses = Course.objects.order_by("-add_time")
+        hot_courses = Course.objects.order_by("-click_nums")[:3]
+
+        # 课程排序
+        sort = request.GET.get("sort", "")
+        if sort == "students":
+            all_courses = all_courses.order_by("-students")
+        elif sort == "hot":
+            all_courses = all_courses.order_by("-click_nums")
+
+        # 对课程数据进行分页
+        try:
+            page = request.GET.get('page', 1)
+        except PageNotAnInteger:
+            page = 1
+
+        p = Paginator(all_courses, per_page=5, request=request)
+
+        courses = p.page(page)
+        
+        return render(request, "course-list.html", {
+            "all_courses": courses,
+            "sort": sort,
+            "hot_courses": hot_courses
+        })

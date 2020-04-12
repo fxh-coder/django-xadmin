@@ -1,6 +1,6 @@
 import xadmin
 
-from courses.models import Course, Lesson, Video, CourseResource
+from courses.models import Course, Lesson, Video, CourseResource, CourseTag
 
 
 class GlobalSettings(object):
@@ -41,9 +41,16 @@ class CourseResourceAdmin(object):
     list_filter = ['course', 'name', 'file', 'add_time']
 
 
+class CourseTagAdmin(object):
+    list_display = ['course', 'tag', 'add_time']
+    search_fields = ['course', 'tag']
+    list_filter = ['course', 'tag', 'add_time']
+
+
 xadmin.site.register(Course, CourseAdmin)
 xadmin.site.register(Lesson, LessonAdmin)
 xadmin.site.register(Video, VideoAdmin)
+xadmin.site.register(CourseTag, CourseTagAdmin)
 xadmin.site.register(CourseResource, CourseResourceAdmin)
 
 xadmin.site.register(xadmin.views.CommAdminView, GlobalSettings)
