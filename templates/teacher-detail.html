@@ -27,9 +27,9 @@
                                 <span class="fl btn1 collectionbtn" id="jsLeftBtn">
                                     {% if teacher_fav %}已收藏{% else %}收藏{% endif %}
                                 </span>
-                                <span class="fr btn2 shareBtn bdsharebuttonbox" data-text="授课教师-{{ teacher.name }}-慕学网"
-                                    data-desc="我在#慕课网#发现了{{ teacher.name }}"
-                                    data-comment="{{ teacher.name }}，工作年限：{{ teacher.work_years }}年；学历：本科；所在公司：{{ teacher.company }}&nbsp;；经典案例：django入门和深入；flask入门"
+                                <span class="fr btn2 shareBtn bdsharebuttonbox" data-tag="share_1"
+                                    data-text="授课教师-{{ teacher.name }}-慕学网" data-desc="我在#慕课网#发现了{{ teacher.name }}"
+                                    data-comment="{{ teacher.name }}，工作年限：{{ teacher.work_years }}年；学历：本科；所在公司：{{ teacher.work_company }}&nbsp;；经典案例：django入门和深入；flask入门"
                                     data-url="{% url 'org:teacher_detail' teacher.id %}">
                                     <span class="fl">分享</span>
                                     <a href="#" class="bds_more" data-cmd="more"></a>
@@ -42,7 +42,7 @@
                             </a>
                             <ul class="cont">
                                 <li>工作年限：<span>{{ teacher.work_years }}年</span></li>
-                                <li>就职公司：<span>{{ teacher.company }}</span></li>
+                                <li>就职公司：<span>{{ teacher.work_company }}</span></li>
                                 <li>工作职位：<span>{{ teacher.work_position }}&nbsp;</span></li>
                                 <li>教学特点：<span>{{ teacher.points }}</span></li>
                             </ul>
@@ -165,71 +165,26 @@
     $(document).ready(function () {
         $('#jsLeftBtn').on('click', function () {
             add_fav($(this), {{ teacher.id }}, 3);
-        });
+    });
     });
     $(document).ready(function () {
         $('#jsRightBtn').on('click', function () {
             add_fav($(this), {{ teacher.org.id }}, 2);
-        });
+    });
     });
 </script>
 <script>
-    var shareUrl = '',
-        shareText = '',
-        shareDesc = '',
-        shareComment = '';
-    $(function () {
-        $(".bdsharebuttonbox a").mouseover(function () {
-            var type = $(this).attr('data-cmd'),
-                $parent = $(this).parent('.bdsharebuttonbox'),
-                fxurl = $parent.attr('data-url'),
-                fxtext = $parent.attr('data-text'),
-                fxdesc = $parent.attr('data-desc'),
-                fxcomment = $parent.attr('data-comment');
-            switch (type) {
-                case 'tsina':
-                case 'tqq':
-                case 'renren':
-                    shareUrl = fxurl;
-                    shareText = fxdesc;
-                    shareDesc = '';
-                    shareComment = '';
-                    break;
-                default:
-                    shareUrl = fxurl;
-                    shareText = fxtext;
-                    shareDesc = fxdesc;
-                    shareComment = fxcomment;
-                    break;
-            }
-        });
-    });
-    function SetShareUrl(cmd, config) {
-        if (shareUrl) {
-            config.bdUrl = "{{ SITE_URL }}" + shareUrl;
-        }
-        if (shareText) {
-            config.bdText = shareText;
-        }
-        if (shareDesc) {
-            config.bdDesc = shareDesc;
-        }
-        if (shareComment) {
-            config.bdComment = shareComment;
-        }
-
-        return config;
-    }
     window._bd_share_config = {
         "common": {
-            "onBeforeClick": SetShareUrl,
-            "bdMini": "2",
-            "searchPic": "1",
-            "bdMiniList": false
+            "bdText": $(".bdsharebuttonbox").attr('data-text'),
+            "bdComment": $(".bdsharebuttonbox").attr('data-comment'),
+            "bdPic": "https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=2446861583,3615923535&fm=26&gp=0.jpg",
+            "bdStyle": "0",
+            "bdSize": "16",
+            "bdUrl": "https://www.imooc.com",
+            "bdDesc": $(".bdsharebuttonbox").attr('data-desc'),
         },
-        "share": {
-            "bdSize": "16"
-        }
+        "share": {},
     };
     with (document) 0[(getElementsByTagName('head')[0] || body).appendChild(createElement('script')).src = 'http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion=' + ~(-new Date() / 36e5)];
 </script>

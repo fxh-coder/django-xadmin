@@ -73,6 +73,8 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 # 上传图片的显示配置
                 'django.template.context_processors.media',
+                # 未读消息配置
+                'apps.users.views.message_nums'
             ],
         },
     },
