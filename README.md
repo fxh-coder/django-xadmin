@@ -193,3 +193,18 @@
 
 ## 关于使用百度分享的问题
    使用这个功能时，有几个参数，尤其是bdUrl这个参数，这个参数要求的url值必须是已经存在的域名，不能是本机
+
+## !!! 当一张表中的外键是另一张表时，另一张表的对象就可以通过反向的方法查询所有关联的内容
+   比如：course-detail.html页面 学习用户的显示
+   在usercourse表中有course的外键，所以可以直接通过course的对象直接反向查询所有的该课程的
+   学习用户，也就是在usercourse表中查询学习该course的用户
+   eg：前端页面可以直接循环course.usercourse_set.all就可以，如果我们不想要显示所有用户，也就是对
+   查询结果进行截取，可以course.usercourse_set.all|slice:"3" 注意！！！一定要带""，否则
+   会报int object has no 'split' attribute
+
+## 实现自定义登录验证功能，让用户可以使用用户名或者手机号都可以进行登录
+   首先要在users views.py文件中实现一个class CustomAuth然后在项目的settings.py中配置
+   AUTHENTICATION_BACKENDS = [
+    "apps.users.views.CustomAuth"
+   ]
+   这样用户在登录的时候，就会自动进入该类进行登录的判断

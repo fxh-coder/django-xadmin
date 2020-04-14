@@ -22,13 +22,14 @@ from django.conf.urls import url, include
 from django.views.decorators.csrf import csrf_exempt
 from django.views.static import serve
 from MxOnline.settings import MEDIA_ROOT
+from apps.operations.views import IndexView
 
 import xadmin
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('xadmin/', xadmin.site.urls),
-    path('', TemplateView.as_view(template_name="index.html"), name="index"),
+    path('', IndexView.as_view(), name="index"),
     path('login/', LoginView.as_view(), name="login"),
     path('register/', RegisterView.as_view(), name="register"),
     path('d_login/', DynamicLoginView.as_view(), name="d_login"),
@@ -38,6 +39,9 @@ urlpatterns = [
 
     # 后台管理图片上传以后正常显示的配置
     url(r'^media/(?P<path>.*)$', serve, {"document_root": MEDIA_ROOT}),
+
+    # url(r'^static/(?P<path>.*)$', serve, {"document_root": STATIC_ROOT}),
+
 
     # 机构相关页面
     url(r'^org/', include(('apps.organizations.urls', "organizations"), namespace="org")),

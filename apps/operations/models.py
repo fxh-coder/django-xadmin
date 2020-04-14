@@ -6,6 +6,21 @@ from django.contrib.auth import get_user_model
 UserProfile = get_user_model()
 
 
+class Banner(BaseModel):
+    title = models.CharField(max_length=100, verbose_name="标题")
+    image = models.ImageField(upload_to="banner/%Y/%m",
+                              max_length=200, verbose_name="轮播图")
+    url = models.URLField(max_length=200, verbose_name="访问地址")
+    index = models.IntegerField(default=0, verbose_name="顺序")
+
+    class Meta:
+        verbose_name = "轮播图"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.title
+
+
 class UserAsk(BaseModel):
     name = models.CharField(max_length=20, verbose_name="姓名")
     mobile = models.CharField(max_length=11, verbose_name="手机")
@@ -20,8 +35,10 @@ class UserAsk(BaseModel):
 
 
 class CourseComments(BaseModel):
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, verbose_name="用户")
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name="课程")
+    user = models.ForeignKey(
+        UserProfile, on_delete=models.CASCADE, verbose_name="用户")
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, verbose_name="课程")
     comments = models.CharField(max_length=200, verbose_name="评论内容")
 
     class Meta:
@@ -33,9 +50,11 @@ class CourseComments(BaseModel):
 
 
 class UserFavorite(BaseModel):
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, verbose_name="用户")
+    user = models.ForeignKey(
+        UserProfile, on_delete=models.CASCADE, verbose_name="用户")
     fav_id = models.IntegerField(verbose_name="数据id")
-    fav_type = models.IntegerField(choices=((1,"课程"),(2,"课程机构"),(3,"讲师")), default=1, verbose_name="收藏类型")
+    fav_type = models.IntegerField(
+        choices=((1, "课程"), (2, "课程机构"), (3, "讲师")), default=1, verbose_name="收藏类型")
 
     class Meta:
         verbose_name = "用户收藏"
@@ -46,7 +65,8 @@ class UserFavorite(BaseModel):
 
 
 class UserMessage(BaseModel):
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, verbose_name="用户")
+    user = models.ForeignKey(
+        UserProfile, on_delete=models.CASCADE, verbose_name="用户")
     message = models.CharField(max_length=200, verbose_name="消息内容")
     has_read = models.BooleanField(default=False, verbose_name="是否已读")
 
@@ -59,8 +79,10 @@ class UserMessage(BaseModel):
 
 
 class UserCourse(BaseModel):
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, verbose_name="用户")
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name="课程")
+    user = models.ForeignKey(
+        UserProfile, on_delete=models.CASCADE, verbose_name="用户")
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, verbose_name="课程")
 
     class Meta:
         verbose_name = "用户课程"

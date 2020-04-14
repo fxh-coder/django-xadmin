@@ -99,7 +99,7 @@
                             <img width="150" height="80" src="{{ teacher.org.image.url }}" />
                         </a>
                     </div>
-                    <a href="org-detail-homepage.html">
+                    <a href="{% url 'org:home' teacher.org.id %}">
                         <h2 class="center">{{ teacher.org.name }}</h2>
                     </a>
                     <p class="center tell">地址：{{ teacher.org.address }}</p>

@@ -11,9 +11,21 @@ from MxOnline.settings import yp_apikey, REDIS_HOST, REDIS_PORT
 import redis
 from users.models import UserProfile
 from django.contrib.auth.mixins import LoginRequiredMixin
-from operations.models import UserCourse, UserFavorite, Course, UserMessage
+from operations.models import UserCourse, UserFavorite, Course, UserMessage, Banner
 from organizations.models import CourseOrg, Teacher
 from pure_pagination import Paginator, PageNotAnInteger
+from django.contrib.auth.backends import ModelBackend
+from django.db.models import Q
+
+
+class CustomAuth(ModelBackend):
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        try:
+            user = UserProfile.objects.get(Q(username=username)|Q(mobile=username))
+            if user.check_password(password):
+                return user
+        except Exception as e:
+            return None
 
 
 def message_nums(request):
@@ -246,15 +258,18 @@ class DynamicLoginView(View):
             return HttpResponseRedirect(reverse("index"))
         next = request.GET.get("next", "")
         login_form = DynamicLoginForm()
+        banners = Banner.objects.all()[:3]
         return render(request, "login.html", {
             "login_form": login_form,
-            "next": next
+            "next": next,
+            "banners": banners
         })
 
     def post(self, request, *args, **kwargs):
         login_form = DynamicLoginPostForm(request.POST)
         # 这个字段是为了错误的话返回的仍然是动态登录的tab，会在前段页面中进行判断
         dynamic_login = True
+        banners = Banner.objects.all()[:3]
         if login_form.is_valid():
             # 没有注册账号依然可以登录
             mobile = login_form.cleaned_data["mobile"]
@@ -278,7 +293,8 @@ class DynamicLoginView(View):
             d_form = DynamicLoginForm()
             return render(request, "login.html", {"login_form": login_form,
                                                   "d_form": d_form,
-                                                  "dynamic_login": dynamic_login})
+                                                  "dynamic_login": dynamic_login,
+                                                  "banners": banners})
 
 
 class SendSmsView(View):
@@ -316,16 +332,18 @@ class LoginView(View):
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return HttpResponseRedirect(reverse("index"))
+        banners = Banner.objects.all()[:3]
         next = request.GET.get("next", "")
         login_form = DynamicLoginForm()
         return render(request, "login.html", {
             "login_form": login_form,
-            "next": next
+            "next": next,
+            "banners": banners
         })
 
     def post(self, request, *args, **kwargs):
         login_form = LoginForm(request.POST)
-
+        banners = Banner.objects.all()[:3]
         if login_form.is_valid():
             user_name = login_form.cleaned_data["username"]
             password = login_form.cleaned_data["password"]
@@ -340,6 +358,13 @@ class LoginView(View):
                     return HttpResponseRedirect(next)
                 return HttpResponseRedirect(reverse("index"))
             else:
-                return render(request, "login.html", {"msg": "用户名或密码错误", "login_form": login_form})
+                return render(request, "login.html", {
+                    "msg": "用户名或密码错误",
+                    "login_form": login_form,
+                    "banners": banners
+                })
         else:
-            return render(request, "login.html", {"login_form": login_form})
+            return render(request, "login.html", {
+                "login_form": login_form,
+                "banners": banners
+            })

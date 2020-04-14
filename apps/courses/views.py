@@ -4,6 +4,7 @@ from pure_pagination import Paginator, PageNotAnInteger
 from courses.models import Course, CourseTag, CourseResource, Video
 from operations.models import UserFavorite, UserCourse, CourseComments
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 
 
 class VideoView(LoginRequiredMixin, View):
@@ -159,11 +160,13 @@ class CourseDetailView(View):
         for course_tag in course_tags:
             related_courses.add(course_tag.course)
 
+        user_courses = course.usercourse_set.all()[:3]
         return render(request, "course-detail.html", {
             "course": course,
             "has_fav_course": has_fav_course,
             "has_fav_org": has_fav_org,
-            "related_courses": related_courses
+            "related_courses": related_courses,
+            "user_courses": user_courses
         })
 
 
@@ -171,6 +174,13 @@ class CourseListView(View):
     def get(self, request, *args, **kwargs):
         all_courses = Course.objects.order_by("-add_time")
         hot_courses = Course.objects.order_by("-click_nums")[:3]
+
+        # 搜索关键词
+        keywords = request.GET.get('keywords', "")
+        s_type = "course"
+        if keywords:
+            all_courses = all_courses.filter(Q(name__icontains=keywords) | Q(
+                desc__icontains=keywords) | Q(detail__icontains=keywords))
 
         # 课程排序
         sort = request.GET.get("sort", "")
@@ -192,5 +202,7 @@ class CourseListView(View):
         return render(request, "course-list.html", {
             "all_courses": courses,
             "sort": sort,
-            "hot_courses": hot_courses
+            "hot_courses": hot_courses,
+            "keywords": keywords,
+            "s_type": s_type
         })

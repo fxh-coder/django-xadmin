@@ -39,17 +39,17 @@
 							</li>
 							<li><span class="pram word3">课程类别：</span><span title="">{{ course.category }}</span></li>
 							<li class="piclist"><span class="pram word4">学习用户：</span>
-
-								<span class="pic"><img width="40" height="40"
-										src="../media/image/2016/12/default_big_14.png" /></span>
-
+								{% for user_course in course.usercourse_set.all|slice:"3" %}
+                                    <span class="pic"><img width="40" height="40" src="{{ user_course.user.image.url }}"/></span>
+                                {% endfor %}
 							</li>
 						</ul>
 						<div class="btns">
 							<div class="btn colectgroupbtn" id="jsLeftBtn">
 								{% if has_fav_course %}已收藏{% else %}收藏{% endif %}
 							</div>
-							<div class="buy btn"><a style="color: white" href="{% url 'course:lesson' course.id %}">开始学习</a></div>
+							<div class="buy btn"><a style="color: white"
+									href="{% url 'course:lesson' course.id %}">开始学习</a></div>
 						</div>
 					</div>
 					<div class="group-share-box">
@@ -130,20 +130,19 @@
 				<div class="head">相关课程推荐</div>
 				<div class="group_recommend">
 					{% for course in related_courses %}
-						<dl>
-							<dt>
-								<a target="_blank" href="">
-									<img width="240" height="220" class="scrollLoading"
-										src="{{ course.image.url }}" />
-								</a>
-							</dt>
-							<dd>
-								<a target="_blank" href="">
-									<h2>{{ course.name }}</h2>
-								</a>
-								<span class="fl">学习时长：<i class="key">{{ course.learn_times }}</i></span>
-							</dd>
-						</dl>
+					<dl>
+						<dt>
+							<a target="_blank" href="{% url 'course:detail' course.id %}">
+								<img width="240" height="220" class="scrollLoading" src="{{ course.image.url }}" />
+							</a>
+						</dt>
+						<dd>
+							<a target="_blank" href="{% url 'course:detail' course.id %}">
+								<h2>{{ course.name }}</h2>
+							</a>
+							<span class="fl">学习时长：<i class="key">{{ course.learn_times }}</i></span>
+						</dd>
+					</dl>
 					{% endfor %}
 				</div>
 			</div>
@@ -182,14 +181,14 @@
 		// 课程收藏按钮
 		$('#jsLeftBtn').on('click', function () {
 			add_fav($(this), {{ course.id }}, 1);
-		});
+	});
 	});
 
 	$(document).ready(function () {
 		// 课程机构的收藏按钮
 		$('#jsRightBtn').on('click', function () {
 			add_fav($(this), {{ course.course_org.id }}, 2);
-		});
+	});
 	});
 
 </script>
