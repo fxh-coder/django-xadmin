@@ -26,10 +26,14 @@ SECRET_KEY = '4gb(b62h+)cqu5f-76b9b112kj2k=f#(y!)(5-l#5k&i1i*_lj'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
+
+AUTHENTICATION_BACKENDS = [
+    "apps.users.views.CustomAuth"
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -151,6 +155,7 @@ REDIS_PORT = 6379
 # 上传图片目录的配置
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # 分页相关设置
 PAGINATION_SETTINGS = {

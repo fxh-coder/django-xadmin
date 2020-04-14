@@ -28,6 +28,7 @@ class Course(BaseModel):
         default="", max_length=300, verbose_name="老师告诉你")
     is_classics = models.BooleanField(default=False, verbose_name="是否是经典课程")
     detail = models.TextField(verbose_name="课程详情")
+    is_banner = models.BooleanField(default=False, verbose_name="是否广告位")
     image = models.ImageField(
         upload_to="courses/%Y/%m", verbose_name="封面图", max_length=100)
 

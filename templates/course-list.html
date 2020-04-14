@@ -81,7 +81,7 @@
                     {% for course in hot_courses %}
                         <dl>
                             <dt>
-                                <a target="_blank" href="">
+                                <a target="_blank" href="{% url 'course:detail' course.id %}">
                                     <img width="240" height="220" class="scrollLoading"
                                         src="{{ course.image.url }} " />
                                 </a>
