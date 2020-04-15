@@ -1,6 +1,8 @@
+from import_export import resources
 import xadmin
 
-from courses.models import Course, Lesson, Video, CourseResource, CourseTag
+from courses.models import Course, Lesson, Video, BannerCourse, CourseResource, CourseTag
+from xadmin.layout import Fieldset, Main, Side, Row
 
 
 class GlobalSettings(object):
@@ -14,6 +16,19 @@ class BaseSettings(object):
     use_bootswatch = True
 
 
+class LessonInline(object):
+    model = Lesson
+    # style = "tab"
+    extra = 0
+    exclude = ["add_time"]
+
+
+class CourseResourceInline(object):
+    model = CourseResource
+    style = "tab"
+    extra = 1
+
+
 class CourseAdmin(object):
     list_display = ['name', 'desc', 'detail',
                     'degree', 'learn_times', 'students']
@@ -23,31 +38,108 @@ class CourseAdmin(object):
     list_editable = ["degree", "desc"]
 
 
+class BannerCourseAdmin(object):
+    list_display = ['name', 'desc', 'detail',
+                    'degree', 'learn_times', 'students']
+    search_fields = ['name', 'desc', 'detail', 'degree', 'students']
+    list_filter = ['name', 'teacher__name', 'desc',
+                   'detail', 'degree', 'learn_times', 'students']
+    list_editable = ["degree", "desc"]
+    model_icon = 'fa fa-chrome'
+
+    def queryset(self):
+        qs = super().queryset()
+        qs = qs.filter(is_banner=True)
+        return qs
+
+
+class MyResource(resources.ModelResource):
+    class Meta:
+        model = Course
+
+
+class NewCourseAdmin(object):
+    import_export_args = {'import_resource_class': MyResource, 'export_resource_class': MyResource}
+    list_display = ['name', 'desc', 'detail', 'show_image', 'go_to',
+                    'degree', 'learn_times', 'students']
+    search_fields = ['name', 'desc', 'detail', 'degree', 'students']
+    list_filter = ['name', 'teacher__name', 'desc',
+                   'detail', 'degree', 'learn_times', 'students']
+    list_editable = ["degree", "desc"]
+    readonly_fields = ["students", "add_time"]
+    # exclude = ["click_nums", "fav_nums"]
+    ordering = ["-click_nums"]
+    model_icon = 'fa fa-book'
+    inlines = [LessonInline, CourseResourceInline]
+    style_fields = {
+        "detail": "ueditor"
+    }
+
+    def queryset(self):
+        qs = super().queryset()
+        if not self.request.user.is_superuser:
+            qs = qs.filter(teacher=self.request.user.teacher)
+        return qs
+
+    def get_form_layout(self):
+        if self.org_obj:
+            self.form_layout = (
+                Main(
+                    Fieldset("讲师信息",
+                             'teacher', 'course_org',
+                             css_class='unsort no_title'
+                             ),
+                    Fieldset("基本信息",
+                             'name', 'desc',
+                             Row('learn_times', 'degree'),
+                             Row('category', 'tag'),
+                             'youneed_know', 'teacher_tell', 'detail',
+                             ),
+                ),
+                Side(
+                    Fieldset("访问信息",
+                             'fav_nums', 'click_nums', 'students', 'add_time'
+                             ),
+                ),
+                Side(
+                    Fieldset("选择信息",
+                             'is_banner', 'is_classics'
+                             ),
+                )
+            )
+        return super(NewCourseAdmin, self).get_form_layout()
+
+
 class LessonAdmin(object):
     list_display = ['course', 'name', 'add_time']
     search_fields = ['course', 'name']
     list_filter = ['course__name', 'name', 'add_time']
+    model_icon = 'fa fa-file-text'
 
 
 class VideoAdmin(object):
     list_display = ['lesson', 'name', 'add_time']
     search_fields = ['lesson', 'name']
     list_filter = ['lesson', 'name', 'add_time']
+    model_icon = 'fa fa-video-camera'
 
 
 class CourseResourceAdmin(object):
     list_display = ['course', 'name', 'file', 'add_time']
     search_fields = ['course', 'name', 'file']
     list_filter = ['course', 'name', 'file', 'add_time']
+    model_icon = 'fa fa-recycle'
 
 
 class CourseTagAdmin(object):
     list_display = ['course', 'tag', 'add_time']
     search_fields = ['course', 'tag']
     list_filter = ['course', 'tag', 'add_time']
+    model_icon = 'fa fa-tags'
 
 
-xadmin.site.register(Course, CourseAdmin)
+xadmin.site.register(BannerCourse, BannerCourseAdmin)
+xadmin.site.register(Course, NewCourseAdmin)
 xadmin.site.register(Lesson, LessonAdmin)
 xadmin.site.register(Video, VideoAdmin)
 xadmin.site.register(CourseTag, CourseTagAdmin)

@@ -3,6 +3,7 @@ from django.db import models
 
 from users.models import BaseModel
 from organizations.models import Teacher, CourseOrg
+from DjangoUeditor.models import UEditorField
 
 
 class Course(BaseModel):
@@ -27,7 +28,8 @@ class Course(BaseModel):
     teacher_tell = models.CharField(
         default="", max_length=300, verbose_name="老师告诉你")
     is_classics = models.BooleanField(default=False, verbose_name="是否是经典课程")
-    detail = models.TextField(verbose_name="课程详情")
+    detail = UEditorField(verbose_name="课程详情", width=600, height=300, imagePath="courses/ueditor/images/",
+                          filePath="courses/ueditor/files/", default="")
     is_banner = models.BooleanField(default=False, verbose_name="是否广告位")
     image = models.ImageField(
         upload_to="courses/%Y/%m", verbose_name="封面图", max_length=100)
@@ -41,6 +43,23 @@ class Course(BaseModel):
 
     def lesson_nums(self):
         return self.lesson_set.all().count()
+
+    def show_image(self):
+        from django.utils.safestring import mark_safe
+        return mark_safe("<img src='{}'>".format(self.image.url))
+    show_image.short_description = "图片"
+
+    def go_to(self):
+        from django.utils.safestring import mark_safe
+        return mark_safe("<a href='/course/{}'>跳转</a>".format(self.id))
+    go_to.short_description = "跳转"
+
+
+class BannerCourse(Course):
+    class Meta:
+        verbose_name = "轮播课程"
+        verbose_name_plural = verbose_name
+        proxy = True
 
 
 class CourseTag(BaseModel):

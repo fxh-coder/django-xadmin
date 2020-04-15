@@ -208,3 +208,98 @@
     "apps.users.views.CustomAuth"
    ]
    这样用户在登录的时候，就会自动进入该类进行登录的判断
+
+## 对于sql注入攻击的防范
+   1. 可以通过form表单校验
+   2. 自定义登录验证器，分多个层次进行校验，都通过后在进行后续操作
+   3. 利用框架自身进行防范
+
+## xadmin框架布局自定义
+   通过在adminx.py中自定义，方法参考courses应用
+
+## 如何让一个讲师对应一个用户，使讲师也能到登录到后台管理系统，但是讲师只能增删查改自己的课程
+   1. 首先需要创建一个分组(讲师组)，该组的权限就是增删查改课程
+   2. 把讲师添加到分组中
+   3. 然后，改变之前的model模型，将teacher绑定用户，进行一对一绑定，具体参考代码
+   4. 然后，在courses应用中的adminx.py中实现queryset方法，进行过滤，如果不是超级用户，
+      那就是讲师，将当前讲师的课程过滤出来，相当于登录后台后只显示当前讲师的课程，当前讲师
+      也只有对他课程的增删查改权限
+
+## 如何在后台对一张表进行两个管理，也就是对一张表，后台侧边栏显示两个标签，管理的是同一张表
+   比如说课程和轮播课程，都是课程表，但是轮播课程显示的只有is_banner为True的课程
+   这样的话，可以添加一个类BannerCourse继承Course，然后在class Meta中配置的时候
+   一定要加上proxy = True，这样就不会生成新的表，也就是对同一张表的管理
+
+## 如何在后台管理中，将课程图片显示出来，如果不配置的话，默认显示的是图片地址
+   首先我们需要在Course类下实现一个Show_image的方法，然后在adminx的list_display显示列中将方法名称配置进去
+   然后我们应该给这一列配置一个名称，如果不配置的话，默认显示方法名称，
+   配置方法在Course类下添加 show_image.short_description = "图片"
+
+## 后台管理 只读字段还有看不到的字段配置都在adminx.py中
+   只读：readonly_fields
+   看不到：exclude
+   但是只读和看不到不能同时配置相同字段(也就是在只读中或者看不到中配置的字段，就不能再看不到和只读中配置)
+   注意：！！！对于必填的字段不要配置(有default值的除外)
+
+## 配置后台管理中的图标
+   xadmin自带的是font-awesome图标库，如果我们觉得版本太低的话，可以自行下载
+   然后复制其中的css和fonts文件夹，覆盖项目中xadmin文件夹下static/vendor/font-awesome
+   文件夹下的css和fonts文件夹就可以了
+   使用的时候，复制类名，然后在adminx.py中进行配置
+
+## 如果我们想要在添加课程的时候，把章节等的也进行添加，如何配置
+   首先在adminx.py中实现一个类：
+   class LessonInline(object):
+      model = Lesson
+      style = "tab"
+      extra = 0
+      exclude = ["add_time"]
+   其他的也是模仿这样，比如：
+   class CourseResourceInline(object):
+      model = CourseResource
+      style = "tab"
+      extra = 1
+   然后再在想要配置的类中添加inlines：
+   inlines = [LessonInline, CourseResourceInline] (我们这里是配置课程)
+   其他的类似
+
+## 上述配置中的inlines属性的bug
+   不能在inlines中两个类中同时使用tab，暂时不能解决
+
+## 在adminx.py中配置布局与exclude看不到的问题
+   两者不能同时配置，否则会冲突，也就是在布局中显示的字段，exclude中
+   不要配置，一个显示，一个不显示，会冲突
+
+## django项目中继承Ueditor插件
+   1. 将djangoueditor源码拷贝到项目根目录下
+   2. INSTALLED_APPS 中配置 'DjangoUeditor'
+   3. 配置相关的url，在项目urls.py中:
+      url(r'^ueditor/',include('DjangoUeditor.urls')),
+   4. 下载ueditor插件并放置到xadmin源码的plugins目录下
+   5. 将editor文件名配置到plugins目录下的__init__.py文件的PLUGINS变量中
+   6. 在对应的model的管理器中配置，也就是adminx.py文件中：
+      style_fields = {
+         "detail":"ueditor"
+      }
+      detail表示model中富文本的字段
+   此外，还要将原来的模型中想要用富文本的字段改为使用UEditorField定义
+   注意，富文本编辑器保存的是一段html代码，如果想要在前端页面中正常显示
+   需要这样写：{% autoescape off %}{{ course.detail }}{% endautoescape %}
+
+## 实现导入导出功能
+   默认的导出功能也是可以的，但是我们想要自己勾选进行导出，或者导入已有数据到项目中，默认的是满足不了的，自己实现
+   首先要在settings.py中INSTALLED_APPS进行注入import_export
+
+   然后在adminx.py中，先导入from import_export import resources
+   然后实现一个类：
+   class MyResource(resources.ModelResource):
+      class Meta:
+         model = Course
+   然后在你想要使用此功能的类里面，这里我们指定的是Course，加入
+   import_export_args = {'import_resource_class': MyResource, 'export_resource_class': MyResource}
+
+   这个时候，由于项目自带的有一个导出功能，所以页面上会显示两个导出
+   如果想要把项目自带的注销，就可以在xadmin/plugin下面的__init__.py
+   文件中将export注释即可
+   其他的想要使用导入导出，配置类似
+   
