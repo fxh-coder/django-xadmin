@@ -1,5 +1,6 @@
 from django.db import models
 from users.models import BaseModel
+from DjangoUeditor.models import UEditorField
 
 
 class City(BaseModel):
@@ -16,7 +17,8 @@ class City(BaseModel):
 
 class CourseOrg(BaseModel):
     name = models.CharField(max_length=50, verbose_name="机构名称")
-    desc = models.TextField(verbose_name="描述")
+    desc = UEditorField(verbose_name="描述", width=600, height=300, imagePath="courses/ueditor/images/",
+                          filePath="courses/ueditor/files/", default="")
     tag = models.CharField(default="全国知名", max_length=10, verbose_name="机构标签")
     category = models.CharField(default="pxjg", verbose_name="机构类别", max_length=4,
                                 choices=(("pxjg", "培训机构"), ("gr", "个人"), ("gx", "高校")))
@@ -42,11 +44,18 @@ class CourseOrg(BaseModel):
         verbose_name = "课程机构"
         verbose_name_plural = verbose_name
 
+    def show_image(self):
+        from django.utils.safestring import mark_safe
+        return mark_safe("<img src='{}'>".format(self.image.url))
+    show_image.short_description = "图片"
+
     def __str__(self):
         return self.name
 
 
+from users.models import UserProfile
 class Teacher(BaseModel):
+    user = models.OneToOneField(UserProfile, on_delete=models.SET_NULL, null=True, blank=True,verbose_name="用户")
     org = models.ForeignKey(
         CourseOrg, on_delete=models.CASCADE, verbose_name="所属机构")
     name = models.CharField(max_length=50, verbose_name=u"教师名")

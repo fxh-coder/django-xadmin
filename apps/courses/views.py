@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.views.generic.base import View
 from pure_pagination import Paginator, PageNotAnInteger
 from courses.models import Course, CourseTag, CourseResource, Video
-from operations.models import UserFavorite, UserCourse, CourseComments
+from operations.models import UserFavorite, UserCourse, CourseComments, UserMessage
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 
@@ -107,6 +107,12 @@ class CourseLessonView(LoginRequiredMixin, View):
             course.students += 1
             course.save()
 
+            user_message = UserMessage()
+            user_message.user = request.user
+            user_message.message = "欢迎您加入{}这门课程，赶快来学习吧！".format(course.name)
+            user_message.save()
+
+
         # 学习过该课程的所有同学
         user_courses = UserCourse.objects.filter(course=course)
         user_ids = [user_course.user.id for user_course in user_courses]
@@ -118,13 +124,16 @@ class CourseLessonView(LoginRequiredMixin, View):
         for item in all_courses:
             if item.course.id != course.id:
                 related_courses.append(item.course)
+        
+        unread_nums = UserMessage.objects.filter(has_read=False).count()
 
         course_resources = CourseResource.objects.filter(course=course)
 
         return render(request, "course-video.html", {
             "course": course,
             "course_resources": course_resources,
-            "related_courses": related_courses
+            "related_courses": related_courses,
+            "unread_nums": unread_nums
         })
 
 

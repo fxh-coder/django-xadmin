@@ -7,12 +7,14 @@ class TeacherAdmin(object):
     list_display = ['org', 'name', 'work_years', 'work_company']
     search_fields = ['org', 'name', 'work_years', 'work_company']
     list_filter = ['org', 'name', 'work_years', 'work_company']
+    model_icon = 'fa fa-user-circle'
 
 
 class CourseOrgAdmin(object):
-    list_display = ['name', 'desc', 'click_nums', 'fav_nums']
+    list_display = ['name', 'desc', 'show_image', 'click_nums', 'fav_nums']
     search_fields = ['name', 'desc', 'click_nums', 'fav_nums']
     list_filter = ['name', 'desc', 'click_nums', 'fav_nums']
+    model_icon = 'fa fa-sitemap'
     style_fields = {
         "desc": "ueditor"
     }
@@ -23,6 +25,7 @@ class CityAdmin(object):
     search_fields = ["name", "desc"]
     list_filter = ["name", "desc", "add_time"]
     list_editable = ["name", "desc"]
+    model_icon = 'fa fa-home'
 
 
 xadmin.site.register(Teacher, TeacherAdmin)
